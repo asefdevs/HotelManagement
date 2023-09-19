@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 import secrets
 from accounts.models import CustomUser
 from django.contrib.sites.shortcuts import get_current_site
-from dj_rest_auth.views import LoginView as RestLogin
+from dj_rest_auth.views import LoginView as RestLogin,LogoutView as RestLogout
 from django.core.mail import send_mail
 from django.conf import settings
 class UserRegistrationView(generics.CreateAPIView):
@@ -30,7 +30,6 @@ class UserRegistrationView(generics.CreateAPIView):
                 'settings.EMAIL_HOST_USER',
                 [user_email],
                 fail_silently=False)
-
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -61,3 +60,4 @@ class CustomLoginView(RestLogin):
 
         self.login()
         return self.get_response()
+    
