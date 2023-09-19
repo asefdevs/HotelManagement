@@ -1,10 +1,9 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
-
+from accounts.models import CustomUser
 class UserSerializer(serializers.ModelSerializer):
     password2=serializers.CharField(write_only=True)
     class Meta:
-        model=User
+        model=CustomUser
         fields=['username','email','password','password2']
         extra_kwargs={'password':{'write_only':True}}
 
@@ -16,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
         email=self.validated_data['email']
         if password!= password2:
             raise serializers.ValidationError({'password2':'passwords doesnt match'})
-        user=User.objects.create(
+        user=CustomUser.objects.create(
             username=username,
             email=email,
             password=password
@@ -25,11 +24,11 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
     def validate_username(self,value):
-        if User.objects.filter(username=value).exists():
+        if CustomUser.objects.filter(username=value).exists():
             raise serializers.ValidationError({'username':'username already exists'})
         return value
     def validate_email(self,value):
-        if User.objects.filter(email=value).exists():
+        if CustomUser.objects.filter(email=value).exists():
             raise serializers.ValidationError({'email':'email already exists'})
         return value
     def validate_password(self,value):
