@@ -8,9 +8,8 @@ import secrets
 from accounts.models import CustomUser
 from django.contrib.sites.shortcuts import get_current_site
 from dj_rest_auth.views import LoginView as RestLogin
-from accounts.api.permissions import IsUserVerified
-
-
+from django.core.mail import send_mail
+from django.conf import settings
 class UserRegistrationView(generics.CreateAPIView):
     serializer_class = UserSerializer
 
@@ -20,11 +19,18 @@ class UserRegistrationView(generics.CreateAPIView):
             user = serializer.save()
             token = secrets.token_urlsafe(32)
             user.email_verification_token = token
+            user_email=user.email
             user.save()
             current_site = get_current_site(request).domain
             relativeLink = reverse('verify-email')
-            absurl = 'http://'+current_site+relativeLink+"?token="+str(token)
-            print(f' ______ her is link {absurl}')
+            verification_link = 'http://'+current_site+relativeLink+"?token="+str(token)
+            send_mail(
+                'Verify your email address',
+                f'Please verify your email address by clicking the link {verification_link}.',
+                'settings.EMAIL_HOST_USER',
+                [user_email],
+                fail_silently=False)
+
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
