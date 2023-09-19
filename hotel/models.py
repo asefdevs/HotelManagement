@@ -70,14 +70,6 @@ class Reservation(models.Model):
     guests = models.ManyToManyField(Guest, blank=True)
     total_price=models.PositiveIntegerField(default=0)
 
-    def save(self, *args, **kwargs):
-        if self.start_date and self.end_date and self.room:
-            duration = (self.end_date - self.start_date).days
-            if duration >= 0:
-                self.total_price = duration * self.room.price_per_night
-            else:
-                return 
-        super().save(*args, **kwargs)
 
 
     def __str__(self):

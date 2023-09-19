@@ -16,12 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
-from accounts.api.urls import urlpatterns as api_url
+from accounts.api.urls import urlpatterns as account_api_url
+from hotel.api.urls import urlpatterns as hotel_api_url
+
 from django.conf import settings
 from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(api_url)),
+    path('api/account/', include(account_api_url)),
+    path('api/hotel/', include(hotel_api_url)),
     # path('auth/', include('dj_rest_auth.urls')),
     # path('rest-auth/', include('rest_framework.urls')),
 ]
