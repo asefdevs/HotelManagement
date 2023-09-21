@@ -39,7 +39,7 @@ class ReservationSerializer(serializers.ModelSerializer):
             if duration:
                 reservation.total_price = duration * reservation.room.price_per_night
             else:
-                reservation.total_price = 77
+                reservation.total_price = None
         else:
-            reservation.total_price = 55
+            reservation.total_price = None
         return reservation

@@ -14,6 +14,9 @@ services:
       - PG_PORT=5432
     depends_on:
       - db
+    volumes:
+      - media_volume:/app/media 
+
 
   db:
     container_name: db
@@ -40,3 +43,4 @@ services:
 
 volumes:
   pgdata: {}
+  media_volume: {}
