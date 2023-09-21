@@ -12,7 +12,7 @@ class Hotel(models.Model):
     email = models.CharField(max_length=200, blank=True, null=True)
     social_media = models.CharField(max_length=200, blank=True, null=True)
     image = models.ImageField(blank=True, null=True, upload_to='hotel_images')
-    about=models.TextField(blank=True, null=True)
+    about = models.TextField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
         existing_instance = Hotel.objects.first()
@@ -52,8 +52,8 @@ class Room(models.Model):
 
 
 class Guest(models.Model):
-    first_name = models.CharField(max_length=100,blank=True)
-    last_name = models.CharField(max_length=100,null=True)
+    first_name = models.CharField(max_length=100, blank=True)
+    last_name = models.CharField(max_length=100, null=True)
     passport_id = models.CharField(blank=True, null=True)
 
     def __str__(self):
@@ -68,9 +68,7 @@ class Reservation(models.Model):
     start_date = models.DateTimeField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
     guests = models.ManyToManyField(Guest, blank=True)
-    total_price=models.PositiveIntegerField(default=0)
-
-
+    total_price = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"Reservation for {self.host.username} in Room {self.room.room_number}"
