@@ -24,12 +24,13 @@ class UserRegistrationView(generics.CreateAPIView):
             current_site = get_current_site(request).domain
             relativeLink = reverse('verify-email')
             verification_link = 'http://'+current_site+relativeLink+"?token="+str(token)
-            send_mail(
-                'Verify your email address',
-                f'Please verify your email address by clicking the link {verification_link}.',
-                'settings.EMAIL_HOST_USER',
-                [user_email],
-                fail_silently=False)
+            # send_mail(
+            #     'Verify your email address',
+            #     f'Please verify your email address by clicking the link {verification_link}.',
+            #     'settings.EMAIL_HOST_USER',
+            #     [user_email],
+            #     fail_silently=False)
+            print(verification_link)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
