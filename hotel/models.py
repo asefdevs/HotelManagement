@@ -14,15 +14,6 @@ class Hotel(models.Model):
     image = models.ImageField(blank=True, null=True, upload_to='hotel_images')
     about = models.TextField(blank=True, null=True)
 
-    def save(self, *args, **kwargs):
-        existing_instance = Hotel.objects.first()
-
-        if existing_instance:
-            self.id = existing_instance.id
-            super(Hotel, self).save(*args, **kwargs)
-        else:
-            super(Hotel, self).save(*args, **kwargs)
-
     def __str__(self):
         return self.name
 

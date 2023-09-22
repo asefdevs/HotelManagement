@@ -20,6 +20,7 @@ class RoomSerializer(serializers.ModelSerializer):
         if Room.objects.filter(room_number=room_number).exists():
             raise serializers.ValidationError(
                 {'room_number': 'Room number already exists'})
+        return data
 
 
 class GuestSerializer(serializers.ModelSerializer):
@@ -29,29 +30,40 @@ class GuestSerializer(serializers.ModelSerializer):
 
 
 class ReservationSerializer(serializers.ModelSerializer):
-    guests = GuestSerializer(many=True)
+    guests = GuestSerializer(many=True, required=False)
 
     class Meta:
         model = Reservation
-        fields = ('start_date', 'end_date',
-                  'total_price', 'host', 'room', 'guests')
+        fields = '__all__'
 
     def create(self, validated_data):
-        guests_data = validated_data.pop('guests')
+        guests_data = validated_data.pop('guests', [])
+        room_type = validated_data['room'].room_type
+
+        if len(guests_data) > int(room_type):
+            raise serializers.ValidationError(
+                "Too many guests for this room type")
+
         reservation = Reservation.objects.create(**validated_data)
 
         for guest_data in guests_data:
-            guest = Guest.objects.create(reservation=reservation, **guest_data)
-            reservation.guests.add(guest)
+            Guest.objects.create(reservation=reservation, **guest_data)
 
-        if reservation.start_date and reservation.end_date and reservation.room and reservation.room.price_per_night is not None:
-            duration = (reservation.end_date - reservation.start_date).days
-            if duration:
-                reservation.total_price = duration * reservation.room.price_per_night
+        start_date = reservation.start_date
+        end_date = reservation.end_date
+        room = reservation.room
+
+        if start_date and end_date and room and room.price_per_night is not None:
+            duration = (end_date - start_date).days
+            if duration>0:
+                reservation.total_price = duration * room.price_per_night
             else:
-                reservation.total_price = None
+                reservation.total_price = room.price_per_night
         else:
             reservation.total_price = None
+
+        reservation.save()
+
         return reservation
 
     def validate(self, data):

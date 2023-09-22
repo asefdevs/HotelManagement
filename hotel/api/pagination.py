@@ -1,4 +1,4 @@
-from rest_framework.pagination import BasePagination
+from rest_framework.pagination import PageNumberPagination
 
-class CustomPagination(BasePagination):
+class CustomPagination(PageNumberPagination):
     page_size = 15
