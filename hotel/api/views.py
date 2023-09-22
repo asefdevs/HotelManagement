@@ -7,30 +7,49 @@ from rest_framework import generics
 from datetime import datetime
 from rest_framework.views import APIView
 from hotel.models import *
+from rest_framework import permissions
+from .pagination import CustomPagination
+from .permissions import *
+class CreateHotelView(generics.CreateAPIView):
 
-
-class CreateHotelView(generics.ListCreateAPIView):
     queryset = Hotel.objects.all()
     serializer_class = HotelSerializer
+    permission_classes=[permissions.IsAdminUser]
 
+class HotelDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Hotel.objects.all()
+    serializer_class=HotelSerializer
+    permission_classes=[IsAdminOrReadOnlyPermission]
 
-class CreateRoomView(generics.ListCreateAPIView):
+class CreateListRoomView(generics.ListCreateAPIView):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
+    permission_classes=[IsAdminOrReadOnlyPermission]
 
 
 class CreateGuestView(generics.ListCreateAPIView):
     queryset = Guest.objects.all()
     serializer_class = GuestSerializer
+    permission_classes=[permissions.IsAdminUser]
+
+class RecentReservationsView(generics.ListAPIView):
+    serializer_class=ReservationSerializer
+    permission_classes=[permissions.IsAuthenticated]
+    def get_queryset(self):
+        queryset=Reservation.objects.filter(host=self.request.user).order_by('-id')
+        return queryset
 
 
 class CreateReservationView(generics.CreateAPIView):
     serializer_class = ReservationSerializer
     queryset = Reservation.objects.all()
+    permission_classes=[permissions.IsAuthenticated]
+
 
 
 class FilterAvaibleRoomsView(APIView):
     serializer_class = ListAvaibleRoomsSerializer
+    permission_classes=[permissions.IsAuthenticated]
 
     def get(self, request):
         start_date_str = request.query_params.get('start_date')

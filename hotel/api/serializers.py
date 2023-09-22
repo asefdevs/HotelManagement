@@ -15,6 +15,12 @@ class RoomSerializer(serializers.ModelSerializer):
         model = Room
         fields = '__all__'
 
+    def validate(self, data):
+        room_number = data['room_number']
+        if Room.objects.filter(room_number=room_number).exists():
+            raise serializers.ValidationError(
+                {'room_number': 'Room number already exists'})
+
 
 class GuestSerializer(serializers.ModelSerializer):
     class Meta:
@@ -61,7 +67,6 @@ class ReservationSerializer(serializers.ModelSerializer):
                  Q(start_date__lte=end_date_str, end_date__gte=end_date_str) |
                  Q(start_date__gte=start_date_str, end_date__lte=end_date_str))
             )
-
             if overlapping_reservations.exists():
                 raise serializers.ValidationError({'room': 'Room is occupied'})
 
