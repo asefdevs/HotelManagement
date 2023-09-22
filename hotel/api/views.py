@@ -1,4 +1,3 @@
-from django.utils import timezone
 from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework import status
@@ -19,8 +18,8 @@ class CreateHotelView(generics.CreateAPIView):
     permission_classes = [permissions.IsAdminUser]
 
     def perform_create(self, serializer):
-        hotel_name='Asef Hotel'
-        name=self.request.data.get('name','')
+        hotel_name = 'Asef Hotel'
+        name = self.request.data.get('name', '')
         serializer.save(name=f'{hotel_name} -{name}')
 
 
@@ -34,10 +33,16 @@ class CreateListRoomView(generics.ListCreateAPIView):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
     permission_classes = [IsAdminOrReadOnlyPermission]
-    pagination_class=CustomPagination
+    pagination_class = CustomPagination
 
 
-class CreateGuestView(generics.ListCreateAPIView):
+class RoomDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+    permission_classes = [IsAdminOrReadOnlyPermission]
+
+
+class ListGuestView(generics.ListAPIView):
     queryset = Guest.objects.all()
     serializer_class = GuestSerializer
     permission_classes = [permissions.IsAdminUser]
@@ -46,8 +51,7 @@ class CreateGuestView(generics.ListCreateAPIView):
 class RecentReservationsView(generics.ListAPIView):
     serializer_class = ReservationSerializer
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class=[CustomPagination]
-
+    pagination_class = CustomPagination
 
     def get_queryset(self):
         queryset = Reservation.objects.filter(
@@ -62,21 +66,18 @@ class CreateReservationView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         guests_data = self.request.data.get('guests')
-        
         reservation = serializer.save()
-        
+
         for guest_data in guests_data:
-            guest=Guest.objects.create(reservation=reservation, **guest_data)
+            guest = Guest.objects.create(reservation=reservation, **guest_data)
             guest.save()
             reservation.guests.add(guest)
-
 
 
 class FilterAvaibleRoomsView(APIView):
     serializer_class = ListAvaibleRoomsSerializer
     permission_classes = [IsAdminOrReadOnlyPermission]
-    pagination_class=[CustomPagination]
-
+    pagination_class = CustomPagination
 
     def get(self, request):
         start_date_str = request.query_params.get('start_date')
@@ -108,4 +109,3 @@ class FilterAvaibleRoomsView(APIView):
                 {'Warning': 'Choose date range'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
