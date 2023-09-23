@@ -1,3 +1,6 @@
+from rest_framework.authentication import TokenAuthentication
+from django.contrib.auth import authenticate, login
+from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import UserSerializer
@@ -7,9 +10,10 @@ from django.shortcuts import redirect
 import secrets
 from accounts.models import CustomUser
 from django.contrib.sites.shortcuts import get_current_site
-from dj_rest_auth.views import LoginView as RestLogin, LogoutView as RestLogout
 from django.core.mail import send_mail
 from django.conf import settings
+from rest_framework import permissions
+from rest_framework.views import APIView
 
 
 class UserRegistrationView(generics.CreateAPIView):
@@ -52,16 +56,38 @@ class VerifyEmailView(generics.GenericAPIView):
             return Response({'error': 'Invalid token or user not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
-class CustomLoginView(RestLogin):
-    def post(self, request, *args, **kwargs):
-        self.request = request
-        self.serializer = self.get_serializer(data=self.request.data)
-        self.serializer.is_valid(raise_exception=True)
+class LoginView(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
 
-        user = self.serializer.validated_data['user']
+        try:
+            user_data = CustomUser.objects.get(username=username)
+        except CustomUser.DoesNotExist:
+            return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        if not user.is_verified:
-            return Response({'detail': 'User is not verified.'}, status=status.HTTP_403_FORBIDDEN)
+        if user_data.is_verified:
+            user = authenticate(username=username, password=password)
 
-        self.login()
-        return self.get_response()
+            if user is not None:
+                login(request, user)
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({
+                    'user_id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'token': token.key
+                })
+            else:
+                return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            return Response({'detail': 'User is not verified'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class LogoutView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        request.auth.delete()
+        return Response({'detail': 'Logged out successfully'}, status=status.HTTP_200_OK)

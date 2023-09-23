@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'hotel.apps.HotelConfig',
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_auth',
 ]
 
 MIDDLEWARE = [
@@ -130,7 +129,11 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+}
 STATIC_URL = 'static/'
 
 MEDIA_URL = '/media/'

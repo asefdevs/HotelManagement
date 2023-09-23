@@ -25,8 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/account/', include(account_api_url)),
     path('api/hotel/', include(hotel_api_url)),
-    # path('auth/', include('dj_rest_auth.urls')),
-    # path('rest-auth/', include('rest_framework.urls')),
+
 ]
 
 if settings.DEBUG == True:
