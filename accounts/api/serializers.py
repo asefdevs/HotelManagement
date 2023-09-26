@@ -35,3 +35,5 @@ class UserSerializer(serializers.ModelSerializer):
         if len(value)<8:
             raise serializers.ValidationError({'password':'password must be at least 8 characters'})
         return value
+    
+

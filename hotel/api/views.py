@@ -3,12 +3,14 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import *
 from rest_framework import generics
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from rest_framework.views import APIView
 from hotel.models import *
 from rest_framework import permissions
 from .pagination import CustomPagination
 from .permissions import *
+from rest_framework.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
 
 
 class CreateHotelView(generics.CreateAPIView):
@@ -59,6 +61,71 @@ class RecentReservationsView(generics.ListAPIView):
         return queryset
 
 
+class ReservationDetailView(APIView):
+    permission_classes = [IsReservationOwnerOrAdmin]
+    serializer_class = ReservationSerializer
+
+    def get_object(self, request, pk):
+        reservation = get_object_or_404(Reservation, pk=pk)
+        return reservation
+
+    def check_time_difference(self, reservation):
+        date_now = datetime.now()
+        end_date = reservation.end_date.replace(tzinfo=None)
+        time_delta = end_date-date_now
+        if time_delta < timedelta(days=2):
+            raise ValidationError(
+                "You can't change or delete your reservation less than 2 days before the end date")
+
+        print(time_delta)
+
+    def get(self, request, pk):
+        try:
+            reservation = self.get_object(request, pk)
+            serializer = ReservationSerializer(reservation)
+        except:
+            return Response(
+                {'error': 'Reservation does not exist.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        try:
+            reservation = self.get_object(request, pk)
+        except Reservation.DoesNotExist:
+            return Response(
+                {'error': 'Reservation does not exist.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        try:
+            self.check_time_difference(reservation)
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = ReservationSerializer(reservation, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        reservation = self.get_object(request, pk)
+        if not reservation:
+            return Response(
+                {'error': 'Reservation does not exist.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        try:
+            self.check_time_difference(reservation)
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        reservation.delete()
+        return Response({'detail': 'Logged out successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+
 class CreateReservationView(generics.CreateAPIView):
     serializer_class = ReservationSerializer
     queryset = Reservation.objects.all()
@@ -66,12 +133,14 @@ class CreateReservationView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         guests_data = self.request.data.get('guests')
-        reservation = serializer.save()
-
-        for guest_data in guests_data:
-            guest = Guest.objects.create(reservation=reservation, **guest_data)
-            guest.save()
-            reservation.guests.add(guest)
+        user = self.request.user
+        reservation = serializer.save(host=user)
+        if guests_data:
+            for guest_data in guests_data:
+                guest = Guest.objects.create(
+                    reservation=reservation, **guest_data)
+                guest.save()
+                reservation.guests.add(guest)
 
 
 class FilterAvaibleRoomsView(APIView):

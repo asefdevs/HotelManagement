@@ -17,7 +17,6 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.authtoken.views import ObtainAuthToken
 
-
 class UserRegistrationView(generics.CreateAPIView):
     serializer_class = UserSerializer
 
@@ -58,7 +57,6 @@ class VerifyEmailView(generics.GenericAPIView):
             return Response({'error': 'Invalid token or user not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
-
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -68,9 +66,9 @@ class LogoutView(APIView):
             return Response({'detail': 'Logged out successfully'}, status=status.HTTP_200_OK)
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
-    
 
-class CustomAuthToken(ObtainAuthToken):
+
+class CustomAuthToken(ObtainAuthToken, generics.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,

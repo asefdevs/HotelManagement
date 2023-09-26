@@ -35,6 +35,7 @@ class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
         fields = '__all__'
+        read_only_fields = ['host']
 
     def create(self, validated_data):
         guests_data = validated_data.pop('guests', [])
@@ -46,25 +47,53 @@ class ReservationSerializer(serializers.ModelSerializer):
 
         reservation = Reservation.objects.create(**validated_data)
 
-        for guest_data in guests_data:
-            Guest.objects.create(reservation=reservation, **guest_data)
-
         start_date = reservation.start_date
         end_date = reservation.end_date
         room = reservation.room
 
         if start_date and end_date and room and room.price_per_night is not None:
             duration = (end_date - start_date).days
-            if duration>0:
+            if duration > 0:
                 reservation.total_price = duration * room.price_per_night
             else:
                 reservation.total_price = room.price_per_night
         else:
-            reservation.total_price = None
+            reservation.total_price = 0
 
         reservation.save()
 
         return reservation
+
+    def update(self, instance, validated_data):
+        guests_data = validated_data.pop('guests', [])
+        room_type = instance.room.room_type
+        if len(guests_data) > int(room_type):
+            raise serializers.ValidationError(
+                "Too many guests for this room type")
+        start_date = validated_data.get('start_date', instance.start_date)
+        end_date = validated_data.get('end_date', instance.end_date)
+        room = validated_data.get('room', instance.room)
+        if start_date and end_date and room and room.price_per_night is not None:
+            duration = (end_date - start_date).days
+            if duration > 0:
+                total_price = duration * room.price_per_night
+            else:
+                total_price = room.price_per_night
+        else:
+            raise serializers.ValidationError('Cannot update the object')
+
+        instance.start_date = start_date
+        instance.end_date = end_date
+        instance.room = room
+        instance.total_price = total_price
+
+        instance.save()
+        instance.guests.clear()
+        for guest_data in guests_data:
+            guest = Guest.objects.create(**guest_data)
+            instance.guests.add(guest)
+
+        return instance
 
     def validate(self, data):
         start_date_str = data.get('start_date')
@@ -80,9 +109,10 @@ class ReservationSerializer(serializers.ModelSerializer):
                  Q(start_date__gte=start_date_str, end_date__lte=end_date_str))
             )
             if overlapping_reservations.exists():
-                raise serializers.ValidationError({'room': 'Room is occupied'})
-
+                raise serializers.ValidationError(
+                    {'room': 'Room is occupied'})
             if start_date_str > end_date_str:
+                print('nooooooooo')
                 raise serializers.ValidationError(
                     {'start_date': 'End date must be greater than start date'})
 

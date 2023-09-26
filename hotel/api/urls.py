@@ -9,6 +9,8 @@ urlpatterns = [
     path('guests/', views.ListGuestView.as_view(), name='guest-list'),
     path('reservations/', views.CreateReservationView.as_view(),
          name='reservation-list-create'),
+    path('reservations/<int:pk>/', views.ReservationDetailView.as_view(),
+         name='reservation-detail'),
     path('recent_reservations/', views.RecentReservationsView.as_view(),
          name='recent-reservations'),
     path('avaible_rooms/', views.FilterAvaibleRoomsView.as_view(), name='avaible-rooms')
