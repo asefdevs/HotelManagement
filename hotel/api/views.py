@@ -62,11 +62,11 @@ class RecentReservationsView(generics.ListAPIView):
 
 
 class ReservationDetailView(APIView):
-    permission_classes = [IsReservationOwnerOrAdmin]
-    serializer_class = ReservationSerializer
+    permission_classes = [permissions.IsAuthenticated, IsReservationOwner]
 
     def get_object(self, request, pk):
         reservation = get_object_or_404(Reservation, pk=pk)
+        self.check_object_permissions(self.request, reservation)
         return reservation
 
     def check_time_difference(self, reservation):

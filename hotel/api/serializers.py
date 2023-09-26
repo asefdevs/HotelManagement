@@ -9,6 +9,12 @@ class HotelSerializer(serializers.ModelSerializer):
         model = Hotel
         fields = '__all__'
 
+    def validate_name(self,value):
+        if Hotel.objects.filter(name=value).exists():
+            raise serializers.ValidationError(
+                {'name': 'Name already exists'})
+        return value
+
 
 class RoomSerializer(serializers.ModelSerializer):
     class Meta:
@@ -112,7 +118,6 @@ class ReservationSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     {'room': 'Room is occupied'})
             if start_date_str > end_date_str:
-                print('nooooooooo')
                 raise serializers.ValidationError(
                     {'start_date': 'End date must be greater than start date'})
 
