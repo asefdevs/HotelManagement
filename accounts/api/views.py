@@ -14,6 +14,8 @@ from django.core.mail import send_mail
 from django.conf import settings
 from rest_framework import permissions
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
+from rest_framework.authtoken.views import ObtainAuthToken
 
 
 class UserRegistrationView(generics.CreateAPIView):
@@ -56,38 +58,31 @@ class VerifyEmailView(generics.GenericAPIView):
             return Response({'error': 'Invalid token or user not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
-class LoginView(APIView):
-    def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-
-        try:
-            user_data = CustomUser.objects.get(username=username)
-        except CustomUser.DoesNotExist:
-            return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        if user_data.is_verified:
-            user = authenticate(username=username, password=password)
-
-            if user is not None:
-                login(request, user)
-                token, created = Token.objects.get_or_create(user=user)
-                return Response({
-                    'user_id': user.id,
-                    'username': user.username,
-                    'email': user.email,
-                    'token': token.key
-                })
-            else:
-                return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-        else:
-            return Response({'detail': 'User is not verified'}, status=status.HTTP_401_UNAUTHORIZED)
-
 
 class LogoutView(APIView):
-    authentication_classes = [TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        request.auth.delete()
-        return Response({'detail': 'Logged out successfully'}, status=status.HTTP_200_OK)
+        try:
+            request.user.auth_token.delete()
+            return Response({'detail': 'Logged out successfully'}, status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+    
+
+class CustomAuthToken(ObtainAuthToken):
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data,
+                                           context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        if user.is_verified:
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({
+                'token': token.key,
+                'user_id': user.pk,
+                'email': user.email
+            })
+        else:
+            return Response({'detail': 'User is not verified'}, status=status.HTTP_401_UNAUTHORIZED)
