@@ -16,7 +16,6 @@ from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.authtoken.views import ObtainAuthToken
-from accounts.tasks import send_mail_to_subscribers
 
 class UserRegistrationView(generics.CreateAPIView):
     serializer_class = UserSerializer
@@ -86,12 +85,5 @@ class CustomAuthToken(ObtainAuthToken, generics.GenericAPIView):
         else:
             return Response({'detail': 'User is not verified'}, status=status.HTTP_401_UNAUTHORIZED)
 
-class YourNewView(APIView):
 
-    def get(self, request):
-        # Your view logic here
 
-        # Trigger the Celery task when this endpoint is accessed
-        send_mail_to_subscribers.delay()
-
-        return Response({'detail': 'Task triggered successfully'}, status=status.HTTP_200_OK)
