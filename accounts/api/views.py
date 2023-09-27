@@ -1,14 +1,12 @@
-from rest_framework.authentication import TokenAuthentication
-from django.contrib.auth import authenticate, login
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import UserSerializer
+from .serializers import UserSerializer,ProfileSerializer,ProfilePhotoUpdateSerializer
 from rest_framework import generics
 from django.urls import reverse
 from django.shortcuts import redirect
 import secrets
-from accounts.models import CustomUser
+from accounts.models import CustomUser,Profile
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
 from django.conf import settings
@@ -16,7 +14,7 @@ from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.authtoken.views import ObtainAuthToken
-
+from.permissions import IsProfileOwner
 class UserRegistrationView(generics.CreateAPIView):
     serializer_class = UserSerializer
 
@@ -86,4 +84,28 @@ class CustomAuthToken(ObtainAuthToken, generics.GenericAPIView):
             return Response({'detail': 'User is not verified'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
+
+class ProfileDetails(generics.RetrieveUpdateAPIView):
+    serializer_class=ProfileSerializer
+    permission_classes =[permissions.IsAuthenticated,IsProfileOwner]
+
+
+    def get_object(self):
+        user=self.request.user
+        try: 
+            profile=Profile.objects.get(user=user)
+        except Profile.DoesNotExist:
+            raise Profile.DoesNotExist
+        return profile
+class ProfilePhotoUpdate(generics.RetrieveUpdateAPIView):
+    serializer_class=ProfilePhotoUpdateSerializer
+    permission_classes =[permissions.IsAuthenticated]
+
+    def get_object(self):
+        user=self.request.user
+        try: 
+            profile=Profile.objects.get(user=user)
+        except Profile.DoesNotExist:
+            return Response('Profile doesnt exist') 
+        return profile
 

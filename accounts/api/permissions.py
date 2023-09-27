@@ -1,6 +1,5 @@
 from rest_framework.permissions import BasePermission
 
-
-# class TokenVerification(BasePermission):
-#     def has_permission(self, request, view):
-#         if request.user re
+class IsProfileOwner(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.user == request.user

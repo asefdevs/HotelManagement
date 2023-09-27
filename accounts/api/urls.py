@@ -5,5 +5,6 @@ urlpatterns = [
     path('verify_email/', views.VerifyEmailView.as_view(), name='verify-email'),
     path('login/', views.CustomAuthToken.as_view(), name='custom_login'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
-    path('celery/', views.YourNewView.as_view(),name='celery'),
+    path('profile/<int:id>/', views.ProfileDetails.as_view(),name='profile-detail'),
+    path('profile/photo_update/',views.ProfilePhotoUpdate.as_view(),name='photo-update'),
 ]
