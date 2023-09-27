@@ -9,7 +9,7 @@ class HotelSerializer(serializers.ModelSerializer):
         model = Hotel
         fields = '__all__'
 
-    def validate_name(self,value):
+    def validate_name(self, value):
         if Hotel.objects.filter(name=value).exists():
             raise serializers.ValidationError(
                 {'name': 'Name already exists'})
