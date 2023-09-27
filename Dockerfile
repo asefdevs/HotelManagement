@@ -10,8 +10,12 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
+RUN pip install celery[redis]
+
 EXPOSE 8000
 
 RUN chmod +x /app/django.sh
+
+WORKDIR /app
 
 ENTRYPOINT ["/app/django.sh"]
