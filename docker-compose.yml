@@ -19,7 +19,6 @@ services:
       - media_volume:/app/media 
   celery_worker:
     build: .
-    # command: celery -A hotelmanagementsystem worker --loglevel=info
     depends_on:
       - redis
 
@@ -47,7 +46,6 @@ services:
       - db
   redis:
     image: redis
-    # restart: always
     ports:
       - 6379:6379
 

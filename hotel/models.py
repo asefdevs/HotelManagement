@@ -51,6 +51,17 @@ class Guest(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 
+def calculate_total_price(start_date, end_date, room):
+    if start_date and end_date and room and room.price_per_night is not None:
+        duration = (end_date - start_date).days
+        if duration > 0:
+            return duration * room.price_per_night
+        else:
+            return room.price_per_night
+    else:
+        return 0
+
+
 class Reservation(models.Model):
     host = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, related_name='user_reservation')
@@ -61,5 +72,9 @@ class Reservation(models.Model):
     guests = models.ManyToManyField(Guest, blank=True)
     total_price = models.PositiveIntegerField(default=0)
 
+    def save(self, *args, **kwargs):
+        self.total_price = calculate_total_price(self.start_date, self.end_date, self.room)
+        super(Reservation, self).save(*args, **kwargs)
+        
     def __str__(self):
         return f"Reservation for {self.host.username} in Room {self.room.room_number}"

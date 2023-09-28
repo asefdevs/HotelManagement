@@ -52,22 +52,7 @@ class ReservationSerializer(serializers.ModelSerializer):
                 "Too many guests for this room type")
 
         reservation = Reservation.objects.create(**validated_data)
-
-        start_date = reservation.start_date
-        end_date = reservation.end_date
-        room = reservation.room
-
-        if start_date and end_date and room and room.price_per_night is not None:
-            duration = (end_date - start_date).days
-            if duration > 0:
-                reservation.total_price = duration * room.price_per_night
-            else:
-                reservation.total_price = room.price_per_night
-        else:
-            reservation.total_price = 0
-
         reservation.save()
-
         return reservation
 
     def update(self, instance, validated_data):
