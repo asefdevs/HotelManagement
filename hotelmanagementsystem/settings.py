@@ -90,7 +90,7 @@ DATABASES = {
         'NAME': os.environ.get('PG_DB', 'postgres'),
         'USER': os.environ.get('PG_USER', 'postgres'),
         'PASSWORD': os.environ.get('PG_PASSWORD', 'postgres'),
-        'HOST': os.environ.get('PG_HOST', 'localhost'),
+        'HOST': os.environ.get('PG_HOST', 'db'),
         'PORT': os.environ.get('PG_PORT', '5432'),
     }
 }
@@ -154,7 +154,7 @@ CELERY_TIMEZONE = 'Asia/Baku'
 AUTH_USER_MODEL = 'accounts.CustomUser'  
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'your mail'
-EMAIL_HOST_PASSWORD = 'your app password' 
+EMAIL_HOST_USER = 'asef.quliyev2001@gmail.com'
+EMAIL_HOST_PASSWORD = 'rjxa pydz cajr djvx '
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True

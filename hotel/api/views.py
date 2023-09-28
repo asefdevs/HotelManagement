@@ -123,7 +123,7 @@ class ReservationDetailView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         reservation.delete()
-        return Response({'detail': 'Logged out successfully'}, status=status.HTTP_204_NO_CONTENT)
+        return Response({'detail': 'Reservation cancelled successfully'}, status=status.HTTP_204_NO_CONTENT)
 
 
 class CreateReservationView(generics.CreateAPIView):

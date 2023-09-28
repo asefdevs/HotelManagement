@@ -14,9 +14,14 @@ services:
       - PG_PORT=5432
     depends_on:
       - db
+      - redis
     volumes:
       - media_volume:/app/media 
-
+  celery_worker:
+    build: .
+    # command: celery -A hotelmanagementsystem worker --loglevel=info
+    depends_on:
+      - redis
 
   db:
     container_name: db
@@ -42,10 +47,9 @@ services:
       - db
   redis:
     image: redis
-    restart: always
+    # restart: always
     ports:
       - 6379:6379
-
 
 volumes:
   pgdata: {}
