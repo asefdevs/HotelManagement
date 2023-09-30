@@ -10,6 +10,7 @@ echo "=================================="
 echo Start celery worker 
 
 celery -A hotelmanagementsystem worker --loglevel=info &
+celery -A hotelmanagementsystem beat --loglevel=info &
 echo "=================================="
 
 

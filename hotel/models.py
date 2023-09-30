@@ -63,7 +63,8 @@ def calculate_total_price(start_date, end_date, room):
 
 
 class Reservation(models.Model):
-    hotel=models.ForeignKey(Hotel,on_delete=models.CASCADE,related_name='reserved_hotel')
+    hotel = models.ForeignKey(
+        Hotel, on_delete=models.CASCADE, related_name='reserved_hotel')
     host = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, related_name='user_reservation')
     room = models.ForeignKey(
@@ -72,9 +73,11 @@ class Reservation(models.Model):
     end_date = models.DateTimeField(blank=True, null=True)
     guests = models.ManyToManyField(Guest, blank=True)
     total_price = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
-        self.total_price = calculate_total_price(self.start_date, self.end_date, self.room)
+        self.total_price = calculate_total_price(
+            self.start_date, self.end_date, self.room)
         super(Reservation, self).save(*args, **kwargs)
 
     def __str__(self):

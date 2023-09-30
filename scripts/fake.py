@@ -5,6 +5,7 @@ from hotel.models import Hotel, Room
 from faker import Faker
 fake = Faker()
 
+
 def generate_fake_data(num_hotels=5, num_rooms_per_hotel=10):
     hotels = []
     for _ in range(num_hotels):
@@ -33,6 +34,3 @@ def generate_fake_data(num_hotels=5, num_rooms_per_hotel=10):
                 is_available=True
             )
             room.save()
-
-
-

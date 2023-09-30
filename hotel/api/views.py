@@ -77,8 +77,6 @@ class ReservationDetailView(APIView):
             raise ValidationError(
                 "You can't change or delete your reservation less than 2 days before the end date")
 
-        print(time_delta)
-
     def get(self, request, pk):
         try:
             reservation = self.get_object(request, pk)
