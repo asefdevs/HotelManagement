@@ -45,7 +45,7 @@ class Room(models.Model):
 class Guest(models.Model):
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, null=True)
-    passport_id = models.CharField(blank=True, null=True)
+    passport_id = models.CharField(max_length=40 , blank=True, null=True)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
