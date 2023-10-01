@@ -141,8 +141,8 @@ class CreateReservationView(generics.CreateAPIView):
                 reservation.guests.add(guest)
 
 
-class FilterAvaibleRoomsView(APIView):
-    serializer_class = ListAvaibleRoomsSerializer
+class FilterAvailableRoomsView(APIView):
+    serializer_class = ListAvailableRoomsSerializer
     permission_classes = [IsAdminOrReadOnlyPermission]
     pagination_class = CustomPagination
 

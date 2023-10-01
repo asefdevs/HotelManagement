@@ -109,7 +109,7 @@ class ReservationSerializer(serializers.ModelSerializer):
         return data
 
 
-class ListAvaibleRoomsSerializer(serializers.ModelSerializer):
+class ListAvailableRoomsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Room
         fields = '__all__'

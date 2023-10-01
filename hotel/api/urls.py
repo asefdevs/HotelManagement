@@ -13,5 +13,5 @@ urlpatterns = [
          name='reservation-detail'),
     path('recent_reservations/', views.RecentReservationsView.as_view(),
          name='recent-reservations'),
-    path('avaible_rooms/', views.FilterAvaibleRoomsView.as_view(), name='avaible-rooms')
+    path('available_rooms/', views.FilterAvailableRoomsView.as_view(), name='available-rooms')
 ]

@@ -34,13 +34,6 @@ class UserRegistrationView(generics.CreateAPIView):
             verification_link = 'http://'+current_site + \
                 relativeLink+"?token="+str(token)
             send_mail_to_subscribers.delay(user_email, verification_link)
-            # send_mail(
-            #     'Verify your email address',
-            #     f'Please verify your email address by clicking the link {verification_link}.',
-            #     'settings.EMAIL_HOST_USER',
-            #     [user_email],
-            #     fail_silently=False)
-
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

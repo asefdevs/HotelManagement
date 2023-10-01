@@ -12,11 +12,11 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 app.conf.beat_schedule = {
     'is_active_check_task': {
         'task': 'accounts.tasks.daily_check_task',
-        'schedule': crontab(minute='*/1'),
+        'schedule': crontab(minute=59,hour=23),
     },
     'notification_task': {
         'task': 'accounts.tasks.reservation_defore_end',
-        'schedule': crontab(minute='*/1'),
+        'schedule': crontab(minute=59,hour=23),
     },
 }
 
