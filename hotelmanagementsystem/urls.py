@@ -26,7 +26,4 @@ urlpatterns = [
     path('api/account/', include(account_api_url)),
     path('api/hotel/', include(hotel_api_url)),
 
-]
-
-if settings.DEBUG == True:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
